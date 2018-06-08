@@ -23,9 +23,31 @@ welcome!
 Mail: tobias@sternraute.de
 Twitter: @2b_as
 
+## Update for Modmobmap
 
-How to build
-============
+This update is a small adaptation to be run with [Modmobmap that was presented at BeeRump 2018](https://www.rump.beer/2018/slides/modmobmap.pdf). In this update was added small parser of log print taken from the XGold DIAG interface, that only displays cell logs information for 3G cells as follows: 
+
+```bash
+  ./xgoldmon -t s3 -m /dev/ttyACM1 -i 127.0.0.1 
+  [...]
+  [CellInfo]:PLMN=208-15;RAC=0x1;LAC=0x4e71;CID=0x1f****;DL_UARFCN=10737;UL_ARFCN=9787
+  [CellInfo]:PLMN=208-20;RAC=0x1;LAC=0x4e71;CID=0x1f****;DL_UARFCN=2950;UL_ARFCN=2725
+  [...]
+  [CellInfo]:PLMN=208-20;RAC=0x1;LAC=0xb5aa;CID=0x97****;DL_UARFCN=10639;UL_ARFCN=9689
+  [CellInfo]:PLMN=208-10;RAC=0x1;LAC=0xb5aa;CID=0x97****;DL_UARFCN=65535;UL_ARFCN=2850
+  [...]
+```
+Note that secret code for ServiceMode *0011* should be typed before. 
+
+To use it out-of-the-box (without Modmobmap), you could also connect to the AT interface as follows and change network operators as well as other things:
+
+```bash
+  screen /dev/ttyACM0 115200
+  AT+COPS=1,2,"<operators>"
+  [...]
+```
+
+## How to build
 
 xgoldmon has been tested on Linux and OSX.
 
@@ -37,9 +59,8 @@ non-standard location please set PKG_CONFIG_PATH accordingly.)
 Then run "make" in the xgoldmon directory. An xgoldmon binary should
 be created.
 
+## Before running xgoldmon
 
-Before running xgoldmon
-=======================
 
 To enable the logging mode ("diag mode") on the S2, S3 and Note2:
 - Go to the Phone application, enter *#9900# and set "Debug Level
@@ -61,45 +82,54 @@ have no other ttyACM* devices, it should be /dev/ttyACM1.
 
 xgoldmon tries to set proper serial attributes on the device if the
 "-s" option is specified. If that fails, you might have to do that
-yourself with something like
+yourself with something like:
 
+
+```bash
   stty 115200 pass8 raw -noflsh -F /dev/ttyACM1
+```
 
-
-Running xgoldmon
-================
+## Running xgoldmon
 
 E.g.:
 
+```bash
   xgoldmon -t s3 -l /dev/ttyACM1
+```
 
 Full usage:
+```bash
 usage: ./xgoldmon [-t <phone type>] [-l] [-s] [-i <ip address>] [-v] <logfile or device>
   -t: select 's4', 's3', 'gnex', 's2' or 'note2' (default: 's3')
   -l: print baseband log messages
+  -m: print Cell logs (could be used with Modmobmap)
   -s: set proper serial device attributes
   -i: send gsmtap packets to given ip address (default: 'localhost')
   -v: show debugging messages (more than once for more messages)
+```
 
 In some situations, the phone might close the device, causing xgoldmon
 to exit. If you want to do some unsupervised logging, it might be a
 good idea to put the call to xgoldmon in a loop.
 
 
-Watching the radio messages in Wireshark
-========================================
+## Watching the radio messages in Wireshark
 
 xgoldmon uses libosmocore to send the radio messages in GSMTAP format
 (http://bb.osmocom.org/trac/wiki/GSMTAP) to UDP port 4729 on the local
 host. In order to monitor the packages with Wireshark, something has
 to listen on that port, e.g.
 
-  nc -u -l 4729
+```bash
+  $ nc -u -l 4729
+```
 
 Then, in Wireshark, start a capture on the loopback interface. To see
 only the GSMTAP messages, set this filter:
 
+```
   udp.port==4729
+```
 
 GSM messages will be decoded out-of-the box in Wireshark. For UMTS/RRC
 messages, you need a recent development version of Wireshark (at least
@@ -112,8 +142,7 @@ text message while in a call. (Lots of messages filtered out to show
 the more relevant messages)
 
 
-Thanks
-======
+## Thanks
 
 Many thanks to...
 
