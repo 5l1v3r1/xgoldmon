@@ -1,5 +1,4 @@
-xgoldmon
-========
+# xgoldmon
 
 xgoldmon is a small tool to convert the messages output by the USB
 logging mode of phones with Intel/Infineon XGold baseband processor
