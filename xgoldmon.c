@@ -53,6 +53,7 @@ void usage(char *cmdname)
   printf("usage: %s [-t <phone type>] [-l] [-s] [-i <ip address>] [-v] <logfile or device>\n"
          "  -t: select 's4', 's3', 'gnex', 's2' or 'note2' (default: '%s')\n"
          "  -l: print baseband log messages\n"
+	 "  -m: print cell log information\n"
          "  -s: set proper serial device attributes\n"
          "  -i: send gsmtap packets to given ip address (default: 'localhost')\n"
          "  -v: show debugging messages (more than once for more messages)\n",
@@ -94,10 +95,13 @@ struct gsmtap_inst *parse_cmdline(int argc, char *argv[],
 
   *p2ltable = NULL;
 
-  while((ret = getopt(argc, argv, "lvshi:t:")) != -1) {
+  while((ret = getopt(argc, argv, "lvmshi:t:")) != -1) {
     switch(ret) {
     case 'l':
       *printlog = 1;
+      break;
+    case 'm':
+      *printlog = 2;
       break;
     case 'v':
       dbglevel++;

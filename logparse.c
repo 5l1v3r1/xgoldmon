@@ -23,6 +23,12 @@
 
 #include "xgoldmon.h"
 
+char last_mcc[4] = "";
+char last_mnc[4] = "";
+char last_rac[4] = "";
+char last_lac[8] = "";
+char last_cid[10] = "";
+
 struct msgb *make_rrc_uplink_msg(uint8_t gsmtap_chan, uint8_t *msg_start, uint16_t msg_len, uint8_t **dummy);
 struct msgb *make_rrc_downlink_msg(uint8_t gsmtap_chan, uint8_t *msg_start, uint16_t msg_len, uint8_t **dummy);
 struct msgb *make_gsml2_msg(uint8_t gsmtap_chan, uint8_t *msg_start, uint16_t msg_len, uint8_t **dummy);
@@ -353,6 +359,59 @@ void send_rmsg(struct gsmtap_inst *gti, struct msgb *rmsg)
     }
 }
 
+void modmobparse(uint8_t *data, int type) {
+/*
+ *	Modmobmap DIAG parsing
+ *	-------------------------------------------
+ *	Parses Cell information for Modmobmap
+ */
+	char * pch;
+	char * spch;
+	char * spch2;
+	char * mccl;
+	char * mncl;
+	char * dl_uarfcn;
+	char * tmp_ul_uarfcn;
+	long int ul_uarfcn;
+	char * rac;
+	char * lac;
+	char * cell_id;
+	char * fptr;
+	pch = strtok_r((char *)data,",", &spch);
+	pch = strtok_r(NULL, ",", &spch);
+	pch = strtok_r(NULL, ",", &spch);
+	if (type == 1) {
+		mccl = strtok_r(pch," ", &spch);
+		mncl = strtok_r(NULL, " ", &spch);
+		memcpy(last_mcc, &mccl[8], 3);
+		memcpy(last_mnc, &mncl[4], 2);
+		last_mcc[3] = '\0';
+		last_mnc[2] = '\0';
+	} else if (type == 2) {
+		strtok_r(pch," ", &spch);
+		strtok_r(NULL," ", &spch);
+		dl_uarfcn = strtok_r(NULL," ", &spch);
+		strtok_r(NULL," ", &spch);
+		tmp_ul_uarfcn = strtok_r(NULL," ", &spch);
+		ul_uarfcn = strtol(tmp_ul_uarfcn, &fptr, 10);
+		printf("[CellInfo]:PLMN=%s-%s;RAC=%s;LAC=%s;CID=%s;DL_UARFCN=%s;UL_ARFCN=%ld\n", last_mcc, last_mnc, last_rac, last_lac, last_cid, dl_uarfcn, ul_uarfcn);
+	} else if (type == 3) {
+		rac = strtok_r(pch, " ", &spch2);
+		rac = strtok_r(NULL, " ", &spch2);
+		memcpy(last_rac, &rac[0], 4);
+		lac = strtok_r(NULL, ",", &spch);
+		lac = strtok_r(lac, " ", &spch2);
+		lac = strtok_r(NULL, " ", &spch2);
+		memcpy(last_lac, &lac[0], 8);
+		cell_id = strtok_r(NULL, ",", &spch);
+		cell_id = strtok_r(cell_id, " ", &spch2);
+		cell_id = strtok_r(NULL, " ", &spch2);
+		memcpy(last_cid, &cell_id[0], 16);
+		last_cid[8] = '\0';
+		//printf("RAC=%s;LAC=%s;CID=%s\n", rac, lac, cell_id);
+	}		
+}
+
 void parse_logmsg(FILE *f, int printlog,
                   struct phone2ltable *p2ltable, struct gsmtap_inst *gti)
 {
@@ -362,7 +421,10 @@ void parse_logmsg(FILE *f, int printlog,
   uint16_t len_msg;
   struct msgb *rmsg;
   static uint8_t *searchmsg = NULL;
-  
+  char * lastplmn_found;
+  char * lastcell_found; 
+  char * lastcellinfo_found; 
+
   pos = ftell(f);
 
   if(!(log_hdr = read_logmsg(f, p2ltable->unescape)))
@@ -373,12 +435,24 @@ void parse_logmsg(FILE *f, int printlog,
 
   rmsg = NULL;
 
+  lastplmn_found = strstr((const char *) data, "Uta:");
+  lastcell_found = strstr((const char *) data, "Idle: dl_uarfcn");
+  lastcellinfo_found = strstr((const char *)data, "[Net]RAC");
+
   switch(log_hdr->type) {
 
   case 0x01:
-    if(printlog) {
+    if(printlog == 1) {
       data[len_msg] = 0;
       printf("LOG:>>%s<<\n", data);
+    }	else if (printlog == 2) {
+	  if (lastplmn_found) {	
+		modmobparse(data, 1);
+	  } else if (lastcell_found) {
+		modmobparse(data, 2);
+	  } else if (lastcellinfo_found) {
+		modmobparse(data, 3);
+	  }
     }
     break;
 
