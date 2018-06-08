@@ -1,4 +1,5 @@
-# xgoldmon
+xgoldmon
+===========
 
 xgoldmon is a small tool to convert the messages output by the USB
 logging mode of phones with Intel/Infineon XGold baseband processor
@@ -22,7 +23,8 @@ welcome!
 Mail: tobias@sternraute.de
 Twitter: @2b_as
 
-## Update for Modmobmap
+Update for Modmobmap
+"""""""""""""""""""""
 
 This update is a small adaptation to be run with [Modmobmap that was presented at BeeRump 2018](https://www.rump.beer/2018/slides/modmobmap.pdf). In this update was added small parser of log print taken from the XGold DIAG interface, that only displays cell logs information for 3G cells as follows: 
 
@@ -46,7 +48,8 @@ To use it out-of-the-box (without Modmobmap), you could also connect to the AT i
   [...]
 ```
 
-## How to build
+How to build
+""""""""""""""""
 
 xgoldmon has been tested on Linux and OSX.
 
@@ -58,8 +61,8 @@ non-standard location please set PKG_CONFIG_PATH accordingly.)
 Then run "make" in the xgoldmon directory. An xgoldmon binary should
 be created.
 
-## Before running xgoldmon
-
+Before running xgoldmon
+"""""""""""""""""""""""
 
 To enable the logging mode ("diag mode") on the S2, S3 and Note2:
 - Go to the Phone application, enter *#9900# and set "Debug Level
@@ -88,7 +91,8 @@ yourself with something like:
   stty 115200 pass8 raw -noflsh -F /dev/ttyACM1
 ```
 
-## Running xgoldmon
+Running xgoldmon
+""""""""""""""""""
 
 E.g.:
 
@@ -112,7 +116,8 @@ to exit. If you want to do some unsupervised logging, it might be a
 good idea to put the call to xgoldmon in a loop.
 
 
-## Watching the radio messages in Wireshark
+Watching the radio messages in Wireshark
+"""""""""""""""""""""""""""""""""""""""""
 
 xgoldmon uses libosmocore to send the radio messages in GSMTAP format
 (http://bb.osmocom.org/trac/wiki/GSMTAP) to UDP port 4729 on the local
@@ -141,7 +146,8 @@ text message while in a call. (Lots of messages filtered out to show
 the more relevant messages)
 
 
-## Thanks
+Thanks
+"""""""
 
 Many thanks to...
 
