@@ -24,7 +24,7 @@ Mail: tobias@sternraute.de
 Twitter: @2b_as
 
 Update for Modmobmap
-"""""""""""""""""""""
+---------------------
 
 This update is a small adaptation to be run with [Modmobmap that was presented at BeeRump 2018](https://www.rump.beer/2018/slides/modmobmap.pdf). In this update was added small parser of log print taken from the XGold DIAG interface, that only displays cell logs information for 3G cells as follows: 
 
@@ -49,7 +49,7 @@ To use it out-of-the-box (without Modmobmap), you could also connect to the AT i
 ```
 
 How to build
-""""""""""""""""
+---------------------
 
 xgoldmon has been tested on Linux and OSX.
 
@@ -62,7 +62,7 @@ Then run "make" in the xgoldmon directory. An xgoldmon binary should
 be created.
 
 Before running xgoldmon
-"""""""""""""""""""""""
+------------------------
 
 To enable the logging mode ("diag mode") on the S2, S3 and Note2:
 - Go to the Phone application, enter *#9900# and set "Debug Level
@@ -92,7 +92,7 @@ yourself with something like:
 ```
 
 Running xgoldmon
-""""""""""""""""""
+---------------------
 
 E.g.:
 
@@ -117,7 +117,7 @@ good idea to put the call to xgoldmon in a loop.
 
 
 Watching the radio messages in Wireshark
-"""""""""""""""""""""""""""""""""""""""""
+-----------------------------------------
 
 xgoldmon uses libosmocore to send the radio messages in GSMTAP format
 (http://bb.osmocom.org/trac/wiki/GSMTAP) to UDP port 4729 on the local
@@ -147,7 +147,7 @@ the more relevant messages)
 
 
 Thanks
-"""""""
+-------
 
 Many thanks to...
 
