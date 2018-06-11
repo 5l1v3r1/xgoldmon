@@ -29,7 +29,12 @@ Update for Modmobmap
 This update is a small adaptation to be run with [Modmobmap that was presented at BeeRump 2018](https://www.rump.beer/2018/slides/modmobmap.pdf). In this update was added small parser of log print taken from the XGold DIAG interface, that only displays cell logs information for 3G cells as follows: 
 
 ```bash
-  ./xgoldmon -t s3 -m /dev/ttyACM1 -i 127.0.0.1 
+  ./xgoldmon -t s3 -m /dev/ttyACM1
+```
+
+The logs could then be read on the FIFO file created for that:
+``` 
+  $ cat ./celllog.fifo
   [...]
   [CellInfo]:PLMN=208-15;RAC=0x1;LAC=0x4e71;CID=0x1f****;DL_UARFCN=10737;UL_ARFCN=9787
   [CellInfo]:PLMN=208-20;RAC=0x1;LAC=0x4e71;CID=0x1f****;DL_UARFCN=2950;UL_ARFCN=2725
