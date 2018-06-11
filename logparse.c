@@ -21,6 +21,10 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "xgoldmon.h"
 
 char last_mcc[4] = "";
@@ -28,6 +32,7 @@ char last_mnc[4] = "";
 char last_rac[4] = "";
 char last_lac[8] = "";
 char last_cid[10] = "";
+char fifo_file[] = "celllog.fifo";
 
 struct msgb *make_rrc_uplink_msg(uint8_t gsmtap_chan, uint8_t *msg_start, uint16_t msg_len, uint8_t **dummy);
 struct msgb *make_rrc_downlink_msg(uint8_t gsmtap_chan, uint8_t *msg_start, uint16_t msg_len, uint8_t **dummy);
@@ -377,6 +382,15 @@ void modmobparse(uint8_t *data, int type) {
 	char * lac;
 	char * cell_id;
 	char * fptr;
+	struct stat sbuf;
+	int cellog_fifo;
+	char logstr[128];
+
+	if(stat(fifo_file, &sbuf) != 0) {
+		mkfifo(fifo_file, 0666);
+	}
+	cellog_fifo = open(fifo_file, O_WRONLY);
+	//write(cellog_fifo, "test", 4+1);
 	pch = strtok_r((char *)data,",", &spch);
 	pch = strtok_r(NULL, ",", &spch);
 	pch = strtok_r(NULL, ",", &spch);
@@ -394,7 +408,9 @@ void modmobparse(uint8_t *data, int type) {
 		strtok_r(NULL," ", &spch);
 		tmp_ul_uarfcn = strtok_r(NULL," ", &spch);
 		ul_uarfcn = strtol(tmp_ul_uarfcn, &fptr, 10);
-		printf("[CellInfo]:PLMN=%s-%s;RAC=%s;LAC=%s;CID=%s;DL_UARFCN=%s;UL_ARFCN=%ld\n", last_mcc, last_mnc, last_rac, last_lac, last_cid, dl_uarfcn, ul_uarfcn);
+		sprintf(logstr, "[CellInfo]:PLMN=%s-%s;RAC=%s;LAC=%s;CID=%s;DL_UARFCN=%s;UL_UARFCN=%ld\n", last_mcc, last_mnc, last_rac, last_lac, last_cid, dl_uarfcn, ul_uarfcn);
+		write(cellog_fifo, logstr, strlen(logstr)+1);
+		//printf("[CellInfo]:PLMN=%s-%s;RAC=%s;LAC=%s;CID=%s;DL_UARFCN=%s;UL_ARFCN=%ld\n", last_mcc, last_mnc, last_rac, last_lac, last_cid, dl_uarfcn, ul_uarfcn);
 	} else if (type == 3) {
 		rac = strtok_r(pch, " ", &spch2);
 		rac = strtok_r(NULL, " ", &spch2);
@@ -409,7 +425,8 @@ void modmobparse(uint8_t *data, int type) {
 		memcpy(last_cid, &cell_id[0], 16);
 		last_cid[8] = '\0';
 		//printf("RAC=%s;LAC=%s;CID=%s\n", rac, lac, cell_id);
-	}		
+	}
+	close(cellog_fifo);	
 }
 
 void parse_logmsg(FILE *f, int printlog,
